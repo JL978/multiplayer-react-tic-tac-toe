@@ -4,7 +4,7 @@ import Icon from './icons'
 const Square = (props) => {
   return (
     <div className="square" onClick={props.onClick.bind(this, props.id)}>
-      <Icon value={props.value} /> 
+      <Icon {...props}/> 
     </div>
   );
 }

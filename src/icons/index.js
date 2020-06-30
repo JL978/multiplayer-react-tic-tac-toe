@@ -8,7 +8,18 @@ const Icon = (props) => {
         case 'O':
             return <O />
         default:
-            return <div></div>
+            if (props.end){
+                return <div></div>
+            }else{
+                switch(props.player){
+                    case 'X':
+                        return <div className='placeHolder'><X /></div>
+                    case 'O':
+                        return <div className='placeHolder'><O /></div>
+                    default:
+                        return <div></div>
+                }   
+            }
     }
 }
 
