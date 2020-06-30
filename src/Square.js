@@ -1,38 +1,15 @@
-import React, {Component} from 'react'
+import React from 'react';
+import Icon from './icons'
 
-const firstX = {
-    background: 'black',
-    width: '90%',
-    height: '90%',
-    position: 'absolute',
-    borderRadius: '50%',
-    // transform: 'rotate(45deg)'
+const Square = (props) => {
+  return (
+    <div className="square" onClick={props.onClick.bind(this, props.id)}>
+      <Icon value={props.value} /> 
+    </div>
+  );
 }
 
-const secondX = {
-    background: 'white',
-    width: '70%',
-    height: '70%',
-    position: 'absolute',
-    borderRadius: '50%',
-    // transform: 'rotate(-45deg)'
-}
+export default Square;
 
-class Square extends Component {
-    constructor(props){
-      super(props)
-      this.state = {}
-    }
-  
-    render(){
-      return(
-        <div className="square">
-            <div className="first" style={firstX}></div>
-            <div className="last" style={secondX}></div>
-        </div>
-      )
-    }
-  }
-  
-  
-  export default Square;
+
+

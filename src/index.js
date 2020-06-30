@@ -1,12 +1,12 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import Square from './Square';
+import Board from './Board';
 
 
 ReactDOM.render(
   <React.StrictMode>
-    <Square />
+    <Board />
   </React.StrictMode>,
   document.getElementById('root')
 );
