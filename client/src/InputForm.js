@@ -1,21 +1,33 @@
 import React from 'react';
 import Input from './Input.js'
+import ChoiceButton from './ChoiceButton'
 
 const InputForm = (props) => {
     const {newGame} = props
-    console.log(newGame)
+    
+    const onBack = ()=>{
+
+    }
+
+    const onSubmit = () =>{
+
+    }
     if (newGame){
         return (
-            <form className="input-form">
+            <div className="input-container">
                 <Input 
                 name='name'
                 placeholder='Your Name...'
                 />
-            </form>
+                <div className='nav-container'>
+                    <ChoiceButton type='nav-back' choice='back' onBack={onBack} label='Back'/>
+                    <ChoiceButton type='nav-forward' choice='enter' onSubmit={onSubmit} label="Let's Go!"/>
+                </div>
+            </div>
         );
     }else{
         return (
-            <form className="input-form">
+            <div className="input-container">
                 <Input 
                 name='name'
                 placeholder='Your Name...'
@@ -24,7 +36,11 @@ const InputForm = (props) => {
                 name='room-id'
                 placeholder='Room ID...'
                 />
-            </form>
+                <div className='nav-container'>
+                    <ChoiceButton type='nav-back' choice='back' onBack={onBack} label='Back'/>
+                    <ChoiceButton type='nav-forward' choice='enter' onSubmit={onSubmit} label="Let's Go!"/>
+                </div>
+            </div>
         );
     }
     
