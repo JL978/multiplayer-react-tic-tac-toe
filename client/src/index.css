@@ -20,6 +20,7 @@ body{
   justify-content: center;
   background: var(--dark-blue);
   background: linear-gradient(180deg, var(--dark-blue) 80%, var(--mid-blue) 100%);
+  overflow: none;
 }
 
 .board{
@@ -83,7 +84,8 @@ body{
 
 .choice-container, .input-container{
   width: 30vw;
-  min-width: 300px;
+  min-width: 250px;
+  max-width: 400px;
   height: 40vh;
   min-height: 350px;
   display: flex;

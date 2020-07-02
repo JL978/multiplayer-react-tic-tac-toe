@@ -1,5 +1,11 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
+import socketIOClient from "socket.io-client"
+
 import Start from './Start';
+import Board from './Board'
+
+
+const ENDPOINT = 'http://127.0.0.1:4000'
 
 const Game = () => {
     const[display, setDisplay] = useState({
@@ -7,10 +13,15 @@ const Game = () => {
         loading: false,
     })
 
+    useEffect(()=>{
+        var socket = socketIOClient(ENDPOINT)
+        return ()=> socket.disconnect()
+    },[])
+
     const onSubmit =(validate) =>{
         setDisplay({loading: true})
         if (validate){
-            console.log('hello')
+            socket.emit('validation', 'hello')
         }else{
             setTimeout(()=>setDisplay(
                 { loading: false }
@@ -19,7 +30,9 @@ const Game = () => {
     }
 
     if (display.playing){
-        return null
+        return (
+            <Board />
+        )
     }else{
         return (
             <Start loading={display.loading} onSubmit={onSubmit}/>

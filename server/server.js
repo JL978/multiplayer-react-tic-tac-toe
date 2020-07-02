@@ -15,7 +15,7 @@ const io = socketio(server)
 
 
 io.on('connection', socket =>{
-    
+    socket.on('validation', (message) => console.log(message))
 })
 
 
