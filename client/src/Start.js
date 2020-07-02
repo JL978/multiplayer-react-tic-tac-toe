@@ -1,7 +1,7 @@
 import React from 'react';
 import Choice from './Choice.js'
 import InputForm from './InputForm.js'
-
+import Loading from './Loading'
 
 class Start extends React.Component {
     constructor(props){
@@ -22,16 +22,28 @@ class Start extends React.Component {
         })
     }
 
+    validate = ()=>{
+        if (this.state.newGame){
+            return !(this.state.name==='')
+        }else{
+            return !(this.state.name==='') && !(this.state.room==='')
+        }
+    }
+
+    onSubmit = ()=>{
+        if (this.validate()){
+            this.props.onSubmit(true)
+        }else{
+            this.props.onSubmit(false)
+        }
+    }
+
     stepBack = ()=>{
         this.setState({step: this.state.step - 1})
     }
 
     stepForward = () =>{
         this.setState({step: this.state.step + 1})
-    }
-
-    submit = () =>{
-        console.log('hello')
     }
 
     onTyping = (e)=>{
@@ -48,14 +60,16 @@ class Start extends React.Component {
                 );
             case(2):
                 return (
-                    <InputForm 
-                        stepBack={this.stepBack} 
-                        onSubmit={this.submit} 
-                        onTyping={this.onTyping.bind(this)}
-                        newGame={this.state.newGame}
-                        name = {this.state.name}
-                        room = {this.state.room}/> 
-                        
+                    <>
+                        <Loading loading={this.props.loading}/>
+                        <InputForm 
+                            stepBack={this.stepBack} 
+                            onSubmit={this.onSubmit} 
+                            onTyping={this.onTyping.bind(this)}
+                            newGame={this.state.newGame}
+                            name = {this.state.name}
+                            room = {this.state.room}/> 
+                    </>
                 );
             default:
                 return null

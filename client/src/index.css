@@ -165,3 +165,23 @@ input:active, input:focus{
   background: var(--mid-blue);
   color: #fff;
 }
+
+.loader{
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top:0;
+  left:0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 3;
+  color: rgba(255,255,255,0.7);
+}
+
+.loader>span{
+  margin-top: 20px;
+}
+
