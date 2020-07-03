@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import Square from './Square';
 
+import io from 'socket.io-client'
+const ENDPOINT = 'http://127.0.0.1:4000'
 
 class Board extends Component {
   constructor(props){
@@ -17,6 +19,10 @@ class Board extends Component {
       [0, 3, 6], [1, 4, 7],[2, 5, 8],
       [0, 4, 8], [2, 4, 6]
     ]
+  }
+
+  componentDidMount() {
+    this.socket = io(ENDPOINT).connect('/game')
   }
 
   handleClick = (index) => {

@@ -17,7 +17,7 @@ const InputForm = (props) => {
                 />
                 <div className='nav-container'>
                     <ChoiceButton type='nav-back' choice='back' onChoice={stepBack} label='Back'/>
-                    <ChoiceButton type='nav-forward' choice='enter' onChoice={onSubmit} label="Let's Go!"/>
+                    <ChoiceButton type='nav-forward' choice='submit' onChoice={onSubmit} label="Let's Go"/>
                 </div>
             </div>
         );
@@ -38,7 +38,8 @@ const InputForm = (props) => {
                 />
                 <div className='nav-container'>
                     <ChoiceButton type='nav-back' choice='back' onChoice={stepBack} label='Back'/>
-                    <ChoiceButton type='nav-forward' choice='enter' onChoice={onSubmit} label="Let's Go!"/>
+                    <ChoiceButton type='nav-forward' choice='submit' onChoice={onSubmit} label="Let's Go"/>
+                    
                 </div>
             </div>
         );

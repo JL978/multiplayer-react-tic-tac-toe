@@ -1,7 +1,7 @@
 import React from 'react';
 
 const beforeStyle ={
-    background: 'black',
+    background: 'white',
     width: '90%',
     height: '90%',
     position: 'absolute',
@@ -9,7 +9,7 @@ const beforeStyle ={
     // transform: 'rotate(45deg)'
 }
 const afterStyle ={
-    background: 'white',
+    background: 'var(--dark-blue)',
     width: '70%',
     height: '70%',
     position: 'absolute',
