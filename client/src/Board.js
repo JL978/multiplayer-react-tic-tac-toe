@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Square from './Square';
 
 import io from 'socket.io-client'
+import qs from 'qs'
 const ENDPOINT = 'http://127.0.0.1:4000'
 
 class Board extends Component {
@@ -22,7 +23,12 @@ class Board extends Component {
   }
 
   componentDidMount() {
-    this.socket = io(ENDPOINT).connect('/game')
+    this.socket = io(ENDPOINT)
+    const {room, name} = qs.parse(window.location.search, {
+      ignoreQueryPrefix: true
+     })
+    const id = sessionStorage.getItem('id')
+    this.socket.emit('newRoomJoin', {room, name, id})
   }
 
   handleClick = (index) => {

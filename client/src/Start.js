@@ -2,6 +2,7 @@ import React from 'react';
 import Choice from './Choice.js'
 import InputForm from './InputForm.js'
 import Loading from './Loading'
+import Error from './Error'
 
 import {Redirect} from 'react-router-dom'
 
@@ -17,19 +18,22 @@ class Start extends React.Component {
             newGame: null,
             room: '',
             loading: false,
-            serverConfirmed: false
+            serverConfirmed: false,
+            error: false,
+            errorMessage: '',
         }
     }
     
     componentDidMount(){
         this.socket = socketIOClient(ENDPOINT)
+        this.socket.on('newSession', (id) => sessionStorage.setItem('id', id))
         this.socket.on('newGameCreated', (room) =>{
-            console.log(room)
             this.setState({serverConfirmed:true, room:room})
         })
         this.socket.on('joinConfirmed', ()=>{
             this.setState({serverConfirmed:true})
         })
+        this.socket.on('errorMessage', (message) => this.displayError(message))
     }
 
 
@@ -57,12 +61,13 @@ class Start extends React.Component {
         this.setState({loading: true})
         if (this.validate()){
             if (this.state.newGame){
-                this.socket.emit('newGame', {name:this.state.name})
+                this.socket.emit('newGame')
             }else{
-                this.socket.emit('joining', {name:this.state.name, room:this.state.room})
+                this.socket.emit('joining', {room:this.state.room})
             }
         }else{
             setTimeout(()=>this.setState({loading: false }), 500)
+            this.displayError(this.state.newGame? 'Please fill out your name':'Please fill out your name and room id')
         }
     }
 
@@ -80,6 +85,13 @@ class Start extends React.Component {
         this.setState(newState)
     }
 
+    displayError = (message) =>{
+        this.setState({error:true, errorMessage:message, loading:false})
+        setTimeout(()=>{
+            this.setState({error:false, errorMessage:''})
+        }, 3000)
+    }
+
     render(){
         if (this.state.serverConfirmed){
             return(
@@ -95,6 +107,7 @@ class Start extends React.Component {
                     return (
                         <>
                             <Loading loading={this.state.loading}/>
+                            <Error display={this.state.error} message={this.state.errorMessage}/>
                             <InputForm 
                                 stepBack={this.stepBack} 
                                 onSubmit={this.onSubmit} 
