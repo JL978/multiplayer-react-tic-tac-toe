@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
+import {Redirect} from 'react-router-dom'
 import Square from './Square';
+import Wait from './Wait'
 
 import io from 'socket.io-client'
 import qs from 'qs'
@@ -11,7 +13,10 @@ class Board extends Component {
     this.state = {
       game: new Array(9).fill(null),
       player: 'X',
-      end: false
+      end: false,
+      waiting: false,
+      room: '',
+      joinError: false,
     }
     //Auxilary data to help with game logic
     this.switch = new Map([['X', 'O'], ['O', 'X']])
@@ -27,8 +32,12 @@ class Board extends Component {
     const {room, name} = qs.parse(window.location.search, {
       ignoreQueryPrefix: true
      })
+    this.setState({room})
     const id = sessionStorage.getItem('id')
     this.socket.emit('newRoomJoin', {room, name, id})
+    this.socket.on('waiting', ()=> this.setState({waiting:true}))
+    this.socket.on('starting', ()=> this.setState({waiting:false}))
+    this.socket.on('joinError', () => this.setState({joinError: true}))
   }
 
   handleClick = (index) => {
@@ -76,15 +85,25 @@ class Board extends Component {
   }
 
   render(){
-    const squareArray = []
-    for (let i=0; i<9; i++){
-      const newSquare = this.renderSquare(i)
-      squareArray.push(newSquare)
+    if (this.state.joinError){
+      return(
+        <Redirect to={`/`} />
+      )
+    }else{
+      const squareArray = []
+      for (let i=0; i<9; i++){
+        const newSquare = this.renderSquare(i)
+        squareArray.push(newSquare)
+      }
+      return(
+        <>
+          <Wait display={this.state.waiting} room={this.state.room}/>
+          <div className="board">
+            {squareArray}
+          </div>
+        </>
+      )
     }
-    return(
-      <div className="board">
-        {squareArray}
-      </div>)
   }
 }
 

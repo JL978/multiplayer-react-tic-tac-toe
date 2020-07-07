@@ -1,8 +1,10 @@
-const player = (name, room, id, piece='') => {
-    name,
-    room,
-    id, 
-    piece
+class Player {
+    constructor(name, room, id, piece='') {
+        this.name = name
+        this.room = room
+        this.id = id
+        this.piece = piece
+    }
 }
 
-module.exports = player
+module.exports = Player

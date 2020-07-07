@@ -6,7 +6,7 @@ const express = require('express')
 const http = require('http')
 const socketio = require('socket.io')
 
-const player = require('./player')
+const Player = require('./player')
 
 const PORT = process.env.PORT || 4000
 
@@ -19,22 +19,38 @@ const io = socketio(server)
 //The room property object looks like this {roomid:str, players:Array(2)}
 const rooms = new Map()
 
-const makeRoom = new Promise((resolve) =>{
-    let newRoom = randRoom()
-    while (rooms.has(newRoom)){
-        newRoom = randRoom()
+const makeRoom = new Promise((resolve, reject) =>{
+    try{
+        let newRoom = randRoom()
+        while (rooms.has(newRoom)){
+            newRoom = randRoom()
+        }
+        rooms.set(newRoom, {roomId: newRoom, players:[]})
+        resolve(newRoom)
+    }catch(error){
+        reject(error)
     }
-    rooms.set([newRoom, {id: newRoom, players:[]}])
-    resolve(newRoom)
 })
 
 const joinRoom = (player, room) => {
-    currentRoom = rooms[room] 
-    rooms[room] = {...currentRoom, players: currentRoom.players.push(player)}
+    currentRoom = rooms.get(room)
+    updatedPlayerList = currentRoom.players.push(player)
+    updatedRoom = {...currentRoom, players:updatedPlayerList}
+}
+
+function kick(room){
+    currentRoom = rooms.get(room)
+    currentRoom.players.pop()
+    console.log(rooms)
 }
 
 function checkRoomFull(room){
-    return rooms[room].players.length == 2
+    console.log(rooms.get(room).players.length)
+    return rooms.get(room).players.length 
+}
+
+function pieceAssignment(){
+    return Math.random > 0.5 ? 'X':'O'
 }
 
 
@@ -42,10 +58,10 @@ io.on('connection', socket =>{
     socket.emit('newSession', socket.id)
 
     //On the client submit event to create a new room
-    socket.on('newGame', (data) => {
+    socket.on('newGame', () => {
         makeRoom.then((room) => {
             socket.emit('newGameCreated', room)
-        })
+        }).catch(error => console.log(error))
     })
 
     //On the client submit even to join a room
@@ -59,12 +75,19 @@ io.on('connection', socket =>{
 
     socket.on('newRoomJoin', ({room,name, id})=>{
         socket.join(room)
-        const newPlayer = player(name, room, id)
+        const newPlayer = new Player(name, room, id)
         joinRoom(newPlayer, room)
-        if (!checkRoomFull(room)){
-            io.to(room).emit('waiting')
-        }else{
-            io.to(room).emit('starting')
+        switch(checkRoomFull(room)){
+            case 2:
+                io.to(room).emit('starting')
+                break
+            case 3:
+                socket.leave(room)
+                kick(room)
+                socket.emit('joinError', 'Game is in session')
+                break
+            default:
+                io.to(room).emit('waiting')
         }
     })
 
