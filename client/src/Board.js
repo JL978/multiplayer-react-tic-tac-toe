@@ -14,13 +14,14 @@ class Board extends Component {
   constructor(props){
     super(props)
     this.state = {
-      game: new Array(9).fill(null),
-      player: 'X',
+      game: null,
+      piece: 'X',
       end: false,
       waiting: false,
       room: '',
       joinError: false,
-      gameDone: false
+      currentPlayer: null,
+      opponentPlayer: []
     }
     //Auxilary data to help with game logic
     this.switch = new Map([['X', 'O'], ['O', 'X']])
@@ -37,11 +38,11 @@ class Board extends Component {
       ignoreQueryPrefix: true
      })
     this.setState({room})
-    const id = sessionStorage.getItem('id')
-    this.socket.emit('newRoomJoin', {room, name, id})
+    this.socket.emit('newRoomJoin', {room, name})
     this.socket.on('waiting', ()=> this.setState({waiting:true}))
     this.socket.on('starting', ()=> this.setState({waiting:false}))
     this.socket.on('joinError', () => this.setState({joinError: true}))
+    this.socket.on('pieceAssignment', (piece) => this.setState({piece: piece}))
   }
 
   handleClick = (index) => {
@@ -59,10 +60,8 @@ class Board extends Component {
         //Used this.state.game here instead of the game variable above 
         //because we want to get the newest game state
         if (this.checkWinner(player, this.state.game)){
-          console.log(`${player} wins`)
           this.setState({end: true})
         }else if(this.checkDraw(this.state.game)){
-          console.log(`draw`)
           this.setState({end: true})
         }
       })
@@ -107,7 +106,7 @@ class Board extends Component {
             {squareArray}
           </div>
           <ScoreBoard data={{player1:['Jimmy', 1], player2:['Joyce', 2]}}/>
-          <PlayAgain gameDone={this.state.gameDone}/>
+          <PlayAgain end={this.state.end}/>
         </>
       )
     }

@@ -26,7 +26,6 @@ class Start extends React.Component {
     
     componentDidMount(){
         this.socket = socketIOClient(ENDPOINT)
-        this.socket.on('newSession', (id) => sessionStorage.setItem('id', id))
         this.socket.on('newGameCreated', (room) =>{
             this.setState({serverConfirmed:true, room:room})
         })
