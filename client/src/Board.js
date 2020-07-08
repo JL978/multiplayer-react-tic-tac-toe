@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import {Redirect} from 'react-router-dom'
 import Square from './Square';
 import Wait from './Wait'
+import Status from './Status'
+import ScoreBoard from './ScoreBoard'
+import PlayAgain from './PlayAgain'
 
 import io from 'socket.io-client'
 import qs from 'qs'
@@ -17,6 +20,7 @@ class Board extends Component {
       waiting: false,
       room: '',
       joinError: false,
+      gameDone: false
     }
     //Auxilary data to help with game logic
     this.switch = new Map([['X', 'O'], ['O', 'X']])
@@ -98,9 +102,12 @@ class Board extends Component {
       return(
         <>
           <Wait display={this.state.waiting} room={this.state.room}/>
+          <Status message='Your Turn'/>
           <div className="board">
             {squareArray}
           </div>
+          <ScoreBoard data={{player1:['Jimmy', 1], player2:['Joyce', 2]}}/>
+          <PlayAgain gameDone={this.state.gameDone}/>
         </>
       )
     }
