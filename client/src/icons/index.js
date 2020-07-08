@@ -8,7 +8,7 @@ const Icon = (props) => {
         case 'O':
             return <O />
         default:
-            if (props.end){
+            if (props.end || !props.turn){
                 return <div></div>
             }else{
                 switch(props.player){

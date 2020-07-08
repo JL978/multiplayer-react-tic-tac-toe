@@ -13,6 +13,11 @@
   font-family: Roboto, Open Sans, Poppins, sans-serif;
 }
 
+#root{
+  min-width: 300px;
+  width: calc(var(--square-width)*3)
+}
+
 body{
   display: flex;
   height: 100vh;

@@ -8,6 +8,7 @@ const socketio = require('socket.io')
 
 const Player = require('./player')
 const Board = require('./board')
+const { isObject } = require('util')
 
 const PORT = process.env.PORT || 4000
 
@@ -20,18 +21,15 @@ const io = socketio(server)
 //The room property object looks like this {roomid:str, players:Array(2)}
 const rooms = new Map()
 
-const makeRoom = new Promise((resolve, reject) =>{
-    try{
-        let newRoom = randRoom()
-        while (rooms.has(newRoom)){
-            newRoom = randRoom()
-        }
-        rooms.set(newRoom, {roomId: newRoom, players:[]})
-        resolve(newRoom)
-    }catch(error){
-        reject(error)
+const makeRoom = (resolve) =>{
+    var newRoom = randRoom()
+    console.log(newRoom)
+    while (rooms.has(newRoom)){
+        newRoom = randRoom()
     }
-})
+    rooms.set(newRoom, {roomId: newRoom, players:[], board:null})
+    resolve(newRoom)
+}
 
 const joinRoom = (player, room) => {
     currentRoom = rooms.get(room)
@@ -50,13 +48,12 @@ function checkRoomFull(room){
 }
 
 function randPiece(){
-    return Math.random > 0.5 ? 'X':'O'
+    return Math.random() > 0.5 ? 'X':'O'
 }
 
 function pieceAssignment(room){
     const firstPiece = randPiece()
     const lastPiece = firstPiece === 'X'? 'O':'X'
-    console.log(firstPiece, lastPiece)
 
     currentRoom = rooms.get(room)
     currentRoom.players[0].piece = firstPiece
@@ -67,15 +64,16 @@ function pieceAssignment(room){
 function newGame(room){
     currentRoom = rooms.get(room)
     const board = new Board
-    currentRoom = {...currentRoom, board:board}
+    currentRoom.board = board
 }
 
 io.on('connection', socket =>{
     //On the client submit event to create a new room
     socket.on('newGame', () => {
-        makeRoom.then((room) => {
+        new Promise(makeRoom).then((room) => {
+            console.log(room)
             socket.emit('newGameCreated', room)
-        }).catch(error => console.log(error))
+        })
     })
 
     //On the client submit event to join a room
@@ -88,23 +86,35 @@ io.on('connection', socket =>{
     })
 
     socket.on('newRoomJoin', ({room,name})=>{
+        //Put the new player into the room
         socket.join(room)
         const id = socket.id
         const newPlayer = new Player(name, room, id)
         joinRoom(newPlayer, room)
+        //Get the number of player in the room
         const peopleInRoom = checkRoomFull(room)
+        //Need another player so emit the waiting event
+        //to display the wait screen on the front end
         if (peopleInRoom===1){
             io.to(room).emit('waiting')
         }
+        //The right amount of people so we start the game
         if (peopleInRoom===2){
             pieceAssignment(room)
             currentPlayers = rooms.get(room).players
-            for (const player of players){
-                io.to(player.id).emit('pieceAssignment', player.piece)
+            for (const player of currentPlayers){
+                io.to(player.id).emit('pieceAssignment', {piece: player.piece, id: player.id})
             }
             newGame(room)
-            io.to(room).emit('starting')
+
+            const currentRoom = rooms.get(room)
+            const gameState = currentRoom.board.game
+            const turn = currentRoom.board.turn
+            const players = currentRoom.players.map((player) => [player.id, player.name])
+            io.to(room).emit('starting', {gameState,players,turn})
         } 
+        //Too many people so we kick them out of the room and redirect 
+        //them to the main starting page
         if (peopleInRoom===3){
             socket.leave(room)
             kick(room)
@@ -112,7 +122,10 @@ io.on('connection', socket =>{
         }
     })
 
-    
+
+    socket.on('move', ({room, player}) => {
+        return
+    })
 
     //TODO: on disconnect - gotta delete player from player list, reset score if anyone
     //is still in the room and emit waiting to the room, or delete room if no one is left. 

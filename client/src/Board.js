@@ -14,60 +14,94 @@ class Board extends Component {
   constructor(props){
     super(props)
     this.state = {
-      game: null,
+      game: new Array(9).fill(null),
       piece: 'X',
+      turn: true,
       end: false,
-      waiting: false,
       room: '',
-      joinError: false,
-      currentPlayer: null,
-      opponentPlayer: []
+      currentPlayerScore: 0,
+      opponentPlayer: [],
+      //State to check for when a new user join
+      waiting: false,
+      joinError: false
     }
-    //Auxilary data to help with game logic
-    this.switch = new Map([['X', 'O'], ['O', 'X']])
-    this.winStates = [
-      [0, 1, 2], [3, 4, 5],[6, 7, 8],
-      [0, 3, 6], [1, 4, 7],[2, 5, 8],
-      [0, 4, 8], [2, 4, 6]
-    ]
+    this.socketID = null
   }
 
   componentDidMount() {
+    //Getting the room and the username information from the url
+    //Then emit to back end to process
     this.socket = io(ENDPOINT)
     const {room, name} = qs.parse(window.location.search, {
       ignoreQueryPrefix: true
      })
     this.setState({room})
     this.socket.emit('newRoomJoin', {room, name})
+
+    //New user join, logic decide on backend whether to display 
+    //the actual game or the wait screen or redirect back to the main page
     this.socket.on('waiting', ()=> this.setState({waiting:true}))
-    this.socket.on('starting', ()=> this.setState({waiting:false}))
+    this.socket.on('starting', ({gameState, players, turn})=> {
+      this.setState({waiting:false})
+      this.gameStart(gameState, players, turn)
+    })
     this.socket.on('joinError', () => this.setState({joinError: true}))
-    this.socket.on('pieceAssignment', (piece) => this.setState({piece: piece}))
+
+    //Listening to the assignment of piece and the gameState event to handle
+    //each move
+    this.socket.on('pieceAssignment', ({piece, id}) => {
+      this.setState({piece: piece})
+      this.socketID = id 
+    })
+    this.socket.on('update', ({gameState, turn}) => this.handlePlay(gameState, turn))
+  }
+
+  gameStart(gameState, players, turn){
+    const opponent = players.filter(([id, name]) => id!==this.socketID)[0][1]
+    this.setState({opponentPlayer: [opponent, 0]})
+    this.setBoard(gameState)
+    this.setTurn(turn)
+  }
+
+  handlePlay(gameState, turn){
+    this.setBoard(gameState)
+    this.setTurn(turn)
+  }
+
+  setTurn(turn){
+    if (this.state.piece === turn){
+      this.setState({turn:true})
+    }else{
+      this.setState({turn:false})
+    }
+  } 
+
+  setBoard(gameState){
+    this.setState({game:gameState})
   }
 
   handleClick = (index) => {
-    const {game, player, end} = this.state
-    if (!game[index] && !end){
-      //Making a new copy of the game state to make changes
-      const newState = [...game]
-      newState.splice(index, 1, player)
-      //Setting the new game state - using a callback function 
-      //to get the new state immediately as React update state asynchronously
-      //and does not guarantee changes right after setState
-      this.setState({game: newState}, () =>{
-        //Check for if the player that just went won the game
-        //Check for if the game is filled but no one won yet (draw)
-        //Used this.state.game here instead of the game variable above 
-        //because we want to get the newest game state
-        if (this.checkWinner(player, this.state.game)){
-          this.setState({end: true})
-        }else if(this.checkDraw(this.state.game)){
-          this.setState({end: true})
-        }
-      })
-      //Only set new player after game state was checked so we check
-      //the right player at the given time
-      this.setState({player: this.switch.get(player)})
+    const {game, piece, end, turn} = this.state
+    if (!game[index] && !end && turn){
+      // //Making a new copy of the game state to make changes
+      // const newState = [...game]
+      // newState.splice(index, 1, piece)
+      // //Setting the new game state - using a callback function 
+      // //to get the new state immediately as React update state asynchronously
+      // //and does not guarantee changes right after setState
+      // this.setState({game: newState}, () =>{
+      //   //Check for if the player that just went won the game
+      //   //Check for if the game is filled but no one won yet (draw)
+      //   //Used this.state.game here instead of the game variable above 
+      //   //because we want to get the newest game state
+      //   if (this.checkWinner(player, this.state.game)){
+      //     this.setState({end: true})
+      //   }else if(this.checkDraw(this.state.game)){
+      //     this.setState({end: true})
+      //   }
+      // })
+      // //Only set new player after game state was checked so we check
+      // //the right player at the given time
     }
   }
   //Auxilary check functions
@@ -83,7 +117,12 @@ class Board extends Component {
 
   renderSquare(i){
     return(
-      <Square key={i} value={this.state.game[i]} player={this.state.player} end={this.state.end} id={i} onClick={this.handleClick}/> 
+      <Square key={i} value={this.state.game[i]} 
+                              player={this.state.piece} 
+                              end={this.state.end} 
+                              id={i} 
+                              onClick={this.handleClick}
+                              turn={this.state.turn}/> 
     )
   }
 
@@ -101,11 +140,11 @@ class Board extends Component {
       return(
         <>
           <Wait display={this.state.waiting} room={this.state.room}/>
-          <Status message='Your Turn'/>
+          <Status message={this.state.turn?'Your Turn':`${this.state.opponentPlayer[0]}'s Turn`}/>
           <div className="board">
             {squareArray}
           </div>
-          <ScoreBoard data={{player1:['Jimmy', 1], player2:['Joyce', 2]}}/>
+          <ScoreBoard data={{player1:['You', this.state.currentPlayerScore], player2:[this.state.opponentPlayer[0], this.state.opponentPlayer[1]]}}/>
           <PlayAgain end={this.state.end}/>
         </>
       )

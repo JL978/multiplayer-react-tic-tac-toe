@@ -13,7 +13,7 @@ const Wait = ({room, display}) => {
             <div className="copy">
                 <h1 className='copy-message'>Give your friend the following room id to connect</h1>
                 <div className='copy-container'>
-                    <input ref={textArea} readOnly="true" value={room} className='copy-area'/>
+                    <input ref={textArea} readOnly={true} value={room} className='copy-area'/>
                     <button className='copy-button' onClick={onClick}>Copy</button>
                 </div>
             </div>
