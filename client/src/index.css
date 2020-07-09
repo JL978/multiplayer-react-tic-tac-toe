@@ -87,7 +87,7 @@ body{
 }
 
 .placeHolder:hover{
-  opacity: 30%;
+  opacity: 0.3;
 }
 
 .choice-container, .input-container{
@@ -100,7 +100,6 @@ body{
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  /* background: var(--light-blue); */
   border-radius: 5px;
 }
 
@@ -128,7 +127,6 @@ body{
 }
 
 .btn-secondary{
-  /* border: 1px solid var(--mid-blue); */
   background: var(--light-blue);
   color: var(--mid-blue);
 }
