@@ -1,7 +1,6 @@
 :root{
   --square-width: 10vw;
   --dark-blue: #011f4b; 
-  /* #011f4b • #03396c • #005b96 • #6497b1 • #b3cde0 */
   --mid-blue: #005b96;
   --light-blue: #b3cde0;
 }
@@ -13,26 +12,30 @@
   font-family: Roboto, Open Sans, Poppins, sans-serif;
 }
 
+
+
+body{
+  display: flex;
+  height: 100vh;
+  min-height: min-content;
+  align-items: center;
+  justify-content: center;
+  background: var(--dark-blue);
+  background: linear-gradient(180deg, var(--dark-blue) 80%, var(--mid-blue) 100%);
+  background-repeat: no-repeat;
+  overflow: none;
+}
+
 #root{
   min-width: 300px;
   width: calc(var(--square-width)*3)
 }
 
-body{
-  display: flex;
-  height: 100vh;
-  align-items: center;
-  justify-content: center;
-  background: var(--dark-blue);
-  background: linear-gradient(180deg, var(--dark-blue) 80%, var(--mid-blue) 100%);
-  overflow: none;
-}
-
 .board{
   display: grid;
   width: max-content;
+  min-height: min-content;
   grid-template-columns: repeat(3, auto);
-  /* grid-template-rows: repeat(3, 1fr); */
 }
 
 
@@ -268,6 +271,7 @@ input:active, input:focus{
   align-items: center;
   justify-content: center;
   color: white;
+  min-height: min-content;
 }
 
 .status-message{

@@ -1,8 +1,8 @@
 import React from 'react';
 import {BrowserRouter as Router, Route} from 'react-router-dom'
 
-import Start from './Start';
-import Board from './Board'
+import Start from './components/pages/Start';
+import Board from './components/pages/Board'
 
 
 const Game = () => (

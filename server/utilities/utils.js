@@ -7,4 +7,8 @@ const randRoom = () => {
     return result;
 }
 
-module.exports = randRoom;
+const randPiece = () => {
+    return Math.random() > 0.5 ? 'X':'O'
+}
+
+module.exports = {randRoom, randPiece};

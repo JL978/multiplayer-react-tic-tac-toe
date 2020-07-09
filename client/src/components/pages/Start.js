@@ -1,8 +1,9 @@
 import React from 'react';
-import Choice from './Choice.js'
-import InputForm from './InputForm.js'
-import Loading from './Loading'
-import Error from './Error'
+
+import Choice from '../functional/Choice.js'
+import InputForm from '../functional/InputForm.js'
+import Loading from '../functional/Loading'
+import Error from '../functional/Error'
 
 import {Redirect} from 'react-router-dom'
 
