@@ -8,7 +8,7 @@ import Error from '../functional/Error'
 import {Redirect} from 'react-router-dom'
 
 import socketIOClient from 'socket.io-client'
-const ENDPOINT = 'https://git.heroku.com/react-ttt-app.git'
+const ENDPOINT = 'https://react-ttt-app.herokuapp.com/'
 
 class Start extends React.Component {
     constructor(props){
