@@ -19,6 +19,7 @@ class Board extends Component {
       turn: true,
       end: false,
       room: '',
+      statusMessage: '',
       currentPlayerScore: 0,
       opponentPlayer: [],
       //State to check for when a new user join
@@ -40,7 +41,7 @@ class Board extends Component {
 
     //New user join, logic decide on backend whether to display 
     //the actual game or the wait screen or redirect back to the main page
-    this.socket.on('waiting', ()=> this.setState({waiting:true}))
+    this.socket.on('waiting', ()=> this.setState({waiting:true, currentPlayerScore:0, opponentPlayer:[]}))
     this.socket.on('starting', ({gameState, players, turn})=> {
       this.setState({waiting:false})
       this.gameStart(gameState, players, turn)
@@ -53,7 +54,39 @@ class Board extends Component {
       this.setState({piece: piece})
       this.socketID = id 
     })
-    this.socket.on('update', ({gameState, turn}) => this.handlePlay(gameState, turn))
+    //Game play logic events
+    this.socket.on('update', ({gameState, turn}) => this.handleUpdate(gameState, turn))
+    this.socket.on('winner', ({gameState,id}) => this.handleWin(id, gameState))
+    this.socket.on('draw', ({gameState}) => this.handleDraw(gameState))
+
+    this.socket.on('restart', ({gameState, turn}) => this.handleRestart(gameState, turn))
+  }
+
+  handleWin(id, gameState) {
+    this.setBoard(gameState)
+    if (this.socketID === id){
+      const playerScore = this.state.currentPlayerScore + 1
+      this.setState({currentPlayerScore:playerScore, statusMessage:'You Win'})
+    }else{
+      const opponentScore = this.state.opponentPlayer[1] + 1
+      const opponent = this.state.opponentPlayer
+      opponent[1] = opponentScore
+      this.setState({opponentPlayer:opponent, statusMessage:`${this.state.opponentPlayer[0]} Wins`})
+    }
+    this.setState({end:true})
+  }
+
+
+  handleDraw(gameState){
+    this.setBoard(gameState)
+    this.setState({end:true, statusMessage:'Draw'})
+  }
+
+  handleRestart(gameState, turn){
+    this.setBoard(gameState)
+    this.setTurn(turn)
+    this.setMessage()
+    this.setState({end: false})
   }
 
   gameStart(gameState, players, turn){
@@ -61,11 +94,17 @@ class Board extends Component {
     this.setState({opponentPlayer: [opponent, 0]})
     this.setBoard(gameState)
     this.setTurn(turn)
+    this.setMessage()
   }
 
-  handlePlay(gameState, turn){
+  handleUpdate(gameState, turn){
     this.setBoard(gameState)
-    this.setTurn(turn)
+    this.setTurn(turn, ()=> this.setMessage())
+  }
+
+  setMessage(){
+    const message = this.state.turn?'Your Turn':`${this.state.opponentPlayer[0]}'s Turn`
+    this.setState({statusMessage:message})
   }
 
   setTurn(turn){
@@ -81,38 +120,14 @@ class Board extends Component {
   }
 
   handleClick = (index) => {
-    const {game, piece, end, turn} = this.state
+    const {game, piece, end, turn, room} = this.state
     if (!game[index] && !end && turn){
-      // //Making a new copy of the game state to make changes
-      // const newState = [...game]
-      // newState.splice(index, 1, piece)
-      // //Setting the new game state - using a callback function 
-      // //to get the new state immediately as React update state asynchronously
-      // //and does not guarantee changes right after setState
-      // this.setState({game: newState}, () =>{
-      //   //Check for if the player that just went won the game
-      //   //Check for if the game is filled but no one won yet (draw)
-      //   //Used this.state.game here instead of the game variable above 
-      //   //because we want to get the newest game state
-      //   if (this.checkWinner(player, this.state.game)){
-      //     this.setState({end: true})
-      //   }else if(this.checkDraw(this.state.game)){
-      //     this.setState({end: true})
-      //   }
-      // })
-      // //Only set new player after game state was checked so we check
-      // //the right player at the given time
+      this.socket.emit('move', {room, piece, index})
     }
   }
-  //Auxilary check functions
-  checkWinner(player, game){
-    return this.winStates.some(state =>(
-      state.every((position => game[position] === player))
-    ))
-  }
 
-  checkDraw(game){
-    return game.every(value => value !== null)
+  playAgainRequest = () => {
+    this.socket.emit('playAgainRequest', this.state.room)
   }
 
   renderSquare(i){
@@ -140,12 +155,12 @@ class Board extends Component {
       return(
         <>
           <Wait display={this.state.waiting} room={this.state.room}/>
-          <Status message={this.state.turn?'Your Turn':`${this.state.opponentPlayer[0]}'s Turn`}/>
+          <Status message={this.state.statusMessage}/>
           <div className="board">
             {squareArray}
           </div>
           <ScoreBoard data={{player1:['You', this.state.currentPlayerScore], player2:[this.state.opponentPlayer[0], this.state.opponentPlayer[1]]}}/>
-          <PlayAgain end={this.state.end}/>
+          <PlayAgain end={this.state.end} onClick={this.playAgainRequest}/>
         </>
       )
     }

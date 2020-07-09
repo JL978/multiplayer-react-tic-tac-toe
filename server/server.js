@@ -43,8 +43,16 @@ function kick(room){
 }
 
 function checkRoomFull(room){
-    console.log(rooms.get(room).players.length)
-    return rooms.get(room).players.length 
+    try{
+        return rooms.get(room).players.length 
+    }
+    catch(e){
+        if (e ==='TypeError'){
+            console.log('hello')
+        }else{
+            console.log(e)
+        }
+    }
 }
 
 function randPiece(){
@@ -71,7 +79,6 @@ io.on('connection', socket =>{
     //On the client submit event to create a new room
     socket.on('newGame', () => {
         new Promise(makeRoom).then((room) => {
-            console.log(room)
             socket.emit('newGameCreated', room)
         })
     })
@@ -123,13 +130,49 @@ io.on('connection', socket =>{
     })
 
 
-    socket.on('move', ({room, player}) => {
-        return
+    socket.on('move', ({room, piece, index}) => {
+        currentBoard = rooms.get(room).board
+        currentBoard.move(index, piece)
+        if (currentBoard.checkWinner(piece)){
+            io.to(room).emit('winner', {gameState:currentBoard.game, id:socket.id})
+        }else if(currentBoard.checkDraw()){
+            io.to(room).emit('draw', {gameState:currentBoard.game})
+        }else{
+            currentBoard.switchTurn()
+            io.to(room).emit('update', {gameState:currentBoard.game, turn:currentBoard.turn})
+        }
+    })
+
+    socket.on('playAgainRequest', (room) => {
+        currentRoom = rooms.get(room)
+        currentRoom.board.reset()
+
+        pieceAssignment(room)
+        currentPlayers = currentRoom.players
+        for (const player of currentPlayers){
+            io.to(player.id).emit('pieceAssignment', {piece: player.piece, id: player.id})
+        }
+
+        io.to(room).emit('restart', {gameState:currentRoom.board.game, turn:currentRoom.board.turn})
     })
 
     //TODO: on disconnect - gotta delete player from player list, reset score if anyone
     //is still in the room and emit waiting to the room, or delete room if no one is left. 
-    socket.on('disconnect',()=> (console.log('player disconnected')))        
+    socket.on('disconnecting', ()=> {
+        const rooms = Object.keys(socket.rooms)
+        if (rooms.length === 2){
+            const room = rooms[1]
+            const num = checkRoomFull(room)
+            if (num === 1){
+                rooms.delete(room)
+            }
+            if (num === 2){
+                currentRoom = rooms.get(room)
+                currentRoom.players = currentRoom.players.filter((player) => player.id !== socket.id)
+                io.to(room).emit('waiting')
+            }
+        }
+    })        
 })
 
 
