@@ -9,7 +9,7 @@ import PlayAgain from '../functional/PlayAgain'
 
 import io from 'socket.io-client'
 import qs from 'qs'
-const ENDPOINT = 'http://127.0.0.1:4000'
+const ENDPOINT = 'https://git.heroku.com/react-ttt-app.git'
 
 class Board extends Component {
   constructor(props){
