@@ -103,6 +103,13 @@ body{
   border-radius: 5px;
 }
 
+img{
+  width: 35vw;
+  max-width: 400px;
+  min-width: 250px;
+  margin-bottom: 20px;
+}
+
 .btn{
   width: 200px;
   height: 50px;
