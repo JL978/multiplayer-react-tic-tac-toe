@@ -3,5 +3,4 @@ A multiplayer tic tac toe game made using React on the front-end and a NodeJS se
 
 ![demo screenshot](demo.gif)
 
-Check it out on https://react-ttt-app.netlify.app/
 
