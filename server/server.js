@@ -16,7 +16,7 @@ const server = http.createServer(app)
 const io = socketio(server)
 
 app.use(cors({
-    origin: "*"
+    origin: "https://react-ttt-app.netlify.app"
 }))
 
 //Store the room ids mapping to the room property object 
