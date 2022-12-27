@@ -15,7 +15,9 @@ const app = express()
 const server = http.createServer(app)
 const io = socketio(server)
 
-app.use(cors())
+app.use(cors({
+    origin: "*"
+}))
 
 //Store the room ids mapping to the room property object 
 //The room property object looks like this {roomid:str, players:Array(2)}
