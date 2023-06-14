@@ -9,7 +9,7 @@ import logo from './logo.png'
 import {Redirect} from 'react-router-dom'
 
 import socketIOClient from 'socket.io-client'
-const ENDPOINT = 'https://react-ttt-app.herokuapp.com/'
+const ENDPOINT = 'https://mptttserver-1-o6222468.deta.app'
 
 class Start extends React.Component {
     constructor(props){
